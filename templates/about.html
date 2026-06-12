@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<div class="about-new-wrapper">
+    <!-- Hero Section -->
+    <section class="hero-section-new">
+        <div class="container-fluid p-0 overflow-hidden">
+            <div class="row g-0 align-items-stretch">
+                <div class="col-lg-6 hero-text-col d-flex align-items-center" data-aos="fade-right">
+                    <div class="hero-text-content ms-auto px-4 py-5" style="max-width: 600px;">
+                        <div class="text-uppercase fw-bold text-muted small mb-3 letter-spacing-2">ABOUT NEPAL'S STORIES
+                        </div>
+                        <h1 class="display-3 fw-bold mb-4">
+                            The best new <span class="text-accent">recipes</span> from top food sites.
+                        </h1>
+                        <p class="lead text-muted mb-5">
+                            NEPAL's Stories is the easiest way to discover fresh, high-quality recipes and share them
+                            with family and friends.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6 position-relative hero-img-col" data-aos="fade-left">
+                    <div class="hero-image-slanted">
+                        <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80"
+                            alt="Culinary Journey">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works-section pt-5 pb-0">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-5 mb-5 mb-lg-0" data-aos="fade-up">
+                    <h2 class="display-5 fw-bold text-dark-accent">Here's how it works</h2>
+                </div>
+                <div class="col-lg-7">
+                    <div class="how-it-works-items">
+                        <div class="work-item mb-4 d-flex" data-aos="fade-up" data-aos-delay="100">
+                            <div class="work-icon me-3">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="work-text">
+                                <p class="mb-0">
+                                    NEPAL's Stories automatically aggregates <strong>new recipes</strong> from hundreds
+                                    of leading food blogs, then organizes and showcases them in a clean,
+                                    <strong>image-driven layout</strong>.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="work-item mb-4 d-flex" data-aos="fade-up" data-aos-delay="200">
+                            <div class="work-icon me-3">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="work-text">
+                                <p class="mb-0">
+                                    Browse our homepage to see <strong>today's recipes</strong>, or type your craving
+                                    into our <strong>natural-language search engine</strong> to find the perfect dish.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="work-item mb-5 d-flex" data-aos="fade-up" data-aos-delay="300">
+                            <div class="work-icon me-3">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="work-text">
+                                <p class="mb-0">
+                                    When you spot a recipe you want to keep, press <strong>Save</strong> to build your
+                                    own <strong>custom collections</strong> and bookmark ideas for later.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="d-flex gap-3" data-aos="fade-up" data-aos-delay="400">
+                            <a href="{{ url_for('how_it_works') }}"
+                                class="btn btn-accent-fill rounded-pill px-4 py-2">Explore
+                                How it Works &rsaquo;</a>
+                            <a href="{{ url_for('index') }}"
+                                class="btn btn-accent-outline rounded-pill px-4 py-2">Browse Recipes &rsaquo;</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- AOS library -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        AOS.init({
+            duration: 1000,
+            once: true,
+            offset: 100
+        });
+    });
+</script>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    .about-new-wrapper {
+        font-family: 'Outfit', sans-serif;
+        background-color: #fff;
+        color: #333;
+    }
+
+    /* Hero Styling */
+    .hero-section-new {
+        background-color: #fff;
+        min-height: 60vh;
+    }
+
+    .hero-text-col {
+        padding-top: 4rem;
+        padding-bottom: 4rem;
+    }
+
+    .letter-spacing-2 {
+        letter-spacing: 2px;
+    }
+
+    .text-accent {
+        color: #d33b2a;
+        /* Red color as in the image */
+    }
+
+    .hero-text-content h1 {
+        line-height: 1.1;
+        color: #1a1a1a;
+    }
+
+    .hero-img-col {
+        min-height: 600px;
+    }
+
+    .hero-image-slanted {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .hero-image-slanted img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+    }
+
+    /* How It Works Styling */
+    .how-it-works-section {
+        background-color: #fdf0ed;
+        /* Precise peach/pink background */
+        color: #4a1a1a;
+    }
+
+    .text-dark-accent {
+        color: #8b261b;
+        /* Dark red for titles */
+    }
+
+    .work-icon {
+        color: #d33b2a;
+        font-size: 1.25rem;
+        padding-top: 3px;
+    }
+
+    .work-text p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #8b261b;
+    }
+
+    .btn-accent-fill {
+        background-color: #d33b2a;
+        border: none;
+        color: white;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-accent-fill:hover {
+        background-color: #a82e21;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .btn-accent-outline {
+        background-color: transparent;
+        border: 1px solid rgba(139, 38, 27, 0.2);
+        color: #d33b2a;
+        font-weight: 600;
+        transition: 0.3s;
+    }
+
+    .btn-accent-outline:hover {
+        background-color: rgba(211, 59, 42, 0.05);
+        border-color: #d33b2a;
+        color: #d33b2a;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 991px) {
+        .hero-image-slanted {
+            clip-path: none;
+            position: relative;
+            height: 400px;
+        }
+
+        .hero-img-col {
+            min-height: auto;
+        }
+
+        .hero-text-content {
+            margin: 0 auto !important;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Recipe - RecipeHub{% endblock %}
+
+{% block content %}
+<div class="main-container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                        <h2 class="fw-bold">Edit Recipe</h2>
+                        <p class="text-muted">Update your recipe details</p>
+                    </div>
+
+                    <form method="POST" enctype="multipart/form-data" id="recipeForm">
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="title" class="form-label">
+                                    <i class="fas fa-heading"></i> Recipe Title *
+                                </label>
+                                <input type="text" class="form-control" id="title" name="title"
+                                    value="{{ recipe.title }}" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="category_id" class="form-label">
+                                    <i class="fas fa-tag"></i> Category
+                                </label>
+                                <select class="form-select" id="category_id" name="category_id">
+                                    <option value="">Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if recipe.category_id==category.id %}selected{%
+                                        endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left"></i> Description
+                            </label>
+                            <textarea class="form-control" id="description" name="description" rows="3"
+                                placeholder="Brief description of your recipe...">{{ recipe.description or '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="video_url" class="form-label">
+                                <i class="fab fa-youtube text-danger"></i> YouTube Video URL
+                            </label>
+                            <input type="url" class="form-control" id="video_url" name="video_url"
+                                placeholder="e.g., https://www.youtube.com/watch?v=..."
+                                value="{{ recipe.video_url or '' }}">
+                            <div class="form-text small">Optional: Add a link to your recipe video</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label for="prep_time" class="form-label">
+                                    <i class="fas fa-clock"></i> Prep Time (min)
+                                </label>
+                                <input type="number" class="form-control" id="prep_time" name="prep_time" min="0"
+                                    value="{{ recipe.prep_time or '' }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="cook_time" class="form-label">
+                                    <i class="fas fa-fire"></i> Cook Time (min)
+                                </label>
+                                <input type="number" class="form-control" id="cook_time" name="cook_time" min="0"
+                                    value="{{ recipe.cook_time or '' }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="servings" class="form-label">
+                                    <i class="fas fa-users"></i> Servings
+                                </label>
+                                <input type="number" class="form-control" id="servings" name="servings" min="1"
+                                    value="{{ recipe.servings or 1 }}">
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label for="difficulty" class="form-label">
+                                    <i class="fas fa-signal"></i> Difficulty
+                                </label>
+                                <select class="form-select" id="difficulty" name="difficulty">
+                                    <option value="Easy" {% if recipe.difficulty=='Easy' %}selected{% endif %}>Easy
+                                    </option>
+                                    <option value="Medium" {% if recipe.difficulty=='Medium' %}selected{% endif %}>
+                                        Medium</option>
+                                    <option value="Hard" {% if recipe.difficulty=='Hard' %}selected{% endif %}>Hard
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="image" class="form-label">
+                                <i class="fas fa-image"></i> Recipe Image
+                            </label>
+                            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                            <div class="form-text">Upload a new photo of your finished dish (optional)</div>
+                            {% if recipe.image_url %}
+                            <div class="mt-2">
+                                <small class="text-muted">Current image:</small><br>
+                                <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                                    class="img-thumbnail mt-1" style="max-height: 100px;">
+                            </div>
+                            {% endif %}
+                            <div id="imagePreview" class="mt-2"></div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="ingredients" class="form-label">
+                                <i class="fas fa-list"></i> Ingredients *
+                            </label>
+                            <textarea class="form-control" id="ingredients" name="ingredients" rows="6"
+                                required>{{ recipe.ingredients }}</textarea>
+                            <div class="form-text">Example:&#10;2 cups flour&#10;1 cup sugar&#10;3 eggs&#10;1/2 cup
+                                butter</div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="instructions" class="form-label">
+                                <i class="fas fa-tasks"></i> Instructions *
+                            </label>
+                            <textarea class="form-control" id="instructions" name="instructions" rows="8"
+                                required>{{ recipe.instructions }}</textarea>
+                            <div class="form-text">Example:&#10;1. Preheat oven to 350°F&#10;2. Mix dry
+                                ingredients&#10;3. Add wet ingredients&#10;4. Bake for 30 minutes</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}"
+                                class="btn btn-outline-secondary btn-lg">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save"></i> Update Recipe
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('imagePreview');
+        const form = document.getElementById('recipeForm');
+
+        // Image preview
+        imageInput.addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreview.innerHTML = `
+                    <img src="${e.target.result}" class="img-thumbnail mt-2" style="max-height: 200px;">
+                    <div class="mt-2">
+                        <small class="text-success">
+                            <i class="fas fa-check-circle"></i> New image selected: ${file.name}
+                        </small>
+                    </div>
+                `;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Auto-resize textareas
+        const textareas = ['ingredients', 'instructions'];
+        textareas.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.style.overflowY = 'hidden';
+                el.addEventListener('input', function () {
+                    this.style.height = 'auto';
+                    this.style.height = (this.scrollHeight) + 'px';
+                });
+                // Initial resize
+                setTimeout(() => {
+                    el.style.height = 'auto';
+                    el.style.height = (el.scrollHeight) + 'px';
+                }, 0);
+            }
+        });
+
+        // Form validation
+        form.addEventListener('submit', function (e) {
+            const ingredients = document.getElementById('ingredients').value.trim();
+            const instructions = document.getElementById('instructions').value.trim();
+
+            if (!ingredients) {
+                e.preventDefault();
+                alert('Please add ingredients to your recipe!');
+                return false;
+            }
+
+            if (!instructions) {
+                e.preventDefault();
+                alert('Please add cooking instructions!');
+                return false;
+            }
+
+            // Show loading state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            submitBtn.disabled = true;
+        });
+    });
+</script>
+{% endblock %}

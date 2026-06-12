@@ -1,0 +1,1257 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.title }} - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<div class="container py-4 position-relative">
+    <!-- Back Button -->
+    <a href="{{ url_for('index') }}"
+        class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center position-absolute top-0 start-0 mt-4 ms-3"
+        style="width: 40px; height: 40px; border: 1px solid #eee; z-index: 1000; transition: all 0.3s ease;">
+        <i class="fas fa-arrow-left text-dark"></i>
+    </a>
+    <!-- Recipe Header -->
+    <div class="card border-0 shadow-lg mb-4">
+        <div class="card-body p-0">
+            {% if recipe.image_url %}
+            <div class="recipe-image-container" style="background: #f8f9fa; position: relative;">
+                {% if recipe.video_url %}
+                <a href="{{ recipe.video_url }}" target="_blank" class="video-play-link">
+                    <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                        class="card-img-top main-recipe-img" alt="{{ recipe.title }}">
+                    <div class="video-play-indicator">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </a>
+                {% else %}
+                <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                    class="card-img-top main-recipe-img" alt="{{ recipe.title }}">
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="recipe-image-container" style="background: #f8f9fa; position: relative;">
+                {% if recipe.video_url %}
+                <a href="{{ recipe.video_url }}" target="_blank" class="video-play-link">
+                    <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/1200/800.jpg"
+                        class="card-img-top main-recipe-img" alt="{{ recipe.title }}">
+                    <div class="video-play-indicator">
+                        <i class="fas fa-play"></i>
+                    </div>
+                </a>
+                {% else %}
+                <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/1200/800.jpg"
+                    class="card-img-top main-recipe-img" alt="{{ recipe.title }}">
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="p-4">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="d-flex align-items-center mb-3">
+                            <h1 class="fw-bold mb-0 me-3">{{ recipe.title }}</h1>
+                            {% if recipe.category_name %}
+                            <span class="badge bg-primary fs-6">{{ recipe.category_name }}</span>
+                            {% endif %}
+                            <span class="difficulty-badge difficulty-{{ recipe.difficulty.lower() }} ms-2">
+                                {{ recipe.difficulty }}
+                            </span>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-4 text-muted mb-3">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-user-circle me-2"></i>
+                                <span>{{ recipe.username }}</span>
+                            </div>
+                            {% if recipe.created_at %}
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar me-2"></i>
+                                <span>{{ recipe.created_at.strftime('%B %d, %Y') }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 text-md-end">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary" onclick="printRecipe()">
+                                <i class="fas fa-print"></i> Print
+                            </button>
+                            {% if session.user_id and session.username == recipe.username %}
+                            <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}" class="btn btn-outline-warning">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button class="btn btn-outline-danger" data-recipe-id="{{ recipe.id }}"
+                                data-recipe-title="{{ recipe.title|e }}"
+                                onclick="deleteRecipe(this.dataset.recipeId, this.dataset.recipeTitle)">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Recipe Details -->
+        <div class="col-lg-8 d-flex flex-column">
+            <!-- Recipe Info Cards -->
+            <div class="row g-3 mb-4">
+                {% if recipe.prep_time %}
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-clock text-primary fa-2x mb-2"></i>
+                            <h6 class="fw-bold">Prep Time</h6>
+                            <p class="mb-0">{{ recipe.prep_time }} min</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if recipe.cook_time %}
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-fire text-danger fa-2x mb-2"></i>
+                            <h6 class="fw-bold">Cook Time</h6>
+                            <p class="mb-0">{{ recipe.cook_time }} min</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if recipe.servings %}
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-users text-success fa-2x mb-2"></i>
+                            <h6 class="fw-bold">Servings</h6>
+                            <p class="mb-0">{{ recipe.servings }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-6 col-md-3">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-signal text-warning fa-2x mb-2"></i>
+                            <h6 class="fw-bold">Difficulty</h6>
+                            <p class="mb-0">{{ recipe.difficulty }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Description -->
+            {% if recipe.description %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-info-circle text-primary me-2"></i>Description
+                    </h5>
+                    <p class="mb-0">{{ recipe.description|nl2br }}</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Ingredients -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-list text-primary me-2"></i>Ingredients
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                {% for ingredient in recipe.ingredients.split('\n') %}
+                                {% if ingredient.strip() %}
+                                <li class="mb-2">
+                                    <i class="fas fa-check-circle text-success me-2"></i>
+                                    {{ ingredient.strip() }}
+                                </li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instructions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-tasks text-primary me-2"></i>Instructions
+                    </h5>
+                    <div class="instructions">
+                        {% for instruction in recipe.instructions.split('\n') if instruction.strip() %}
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width: 30px; height: 30px;">
+                                    <span class="fw-bold">{{ loop.index }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <p class="mb-0">{{ instruction.strip()|nl2br }}</p>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4 d-flex flex-column">
+            <!-- Rating & Actions -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-star text-warning me-2"></i>Rate This Recipe
+                    </h5>
+
+                    {% if session.user_id %}
+                    <form method="POST" action="{{ url_for('rate_recipe', recipe_id=recipe.id) }}" class="mb-3">
+                        <div class="mb-3 text-center">
+                            <label class="form-label d-block">Your Rating</label>
+                            <div class="btn-group" role="group">
+                                {% for i in range(1, 6) %}
+                                <input type="radio" class="btn-check" name="rating" id="star{{ i }}" value="{{ i }}" {%
+                                    if user_rating and user_rating.rating==i %}checked{% endif %}>
+                                <label class="btn btn-outline-warning" for="star{{ i }}">
+                                    <i class="fas fa-star"></i>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Review (Optional)</label>
+                            <textarea class="form-control" name="review" rows="2"
+                                placeholder="Tell us what you thought...">{{ user_rating.review if user_rating else '' }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            <i class="fas fa-thumbs-up me-2"></i>{% if user_rating %}Update Rating{% else %}Submit
+                            Rating{% endif %}
+                        </button>
+
+                        {% if user_rating %}
+                        <button type="button" class="btn btn-outline-secondary btn-sm w-100"
+                            onclick="removeRating({{ recipe.id }})">
+                            <i class="fas fa-times me-2"></i>Remove My Rating
+                        </button>
+                        {% endif %}
+                    </form>
+                    {% else %}
+                    <p class="text-muted mb-3">
+                        <a href="{{ url_for('login') }}">Login</a> to rate this recipe
+                    </p>
+                    {% endif %}
+
+                    <div class="text-center">
+                        <div class="d-flex align-items-center justify-content-center mb-2">
+                            {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+                            {% set rating_class = 'rating-low' %}
+                            {% if recipe.avg_rating >= 4.0 %}
+                            {% set rating_class = 'rating-high' %}
+                            {% elif recipe.avg_rating >= 3.0 %}
+                            {% set rating_class = 'rating-mid' %}
+                            {% endif %}
+                            <div class="d-flex flex-column align-items-center">
+                                <h2 class="fw-bold mb-0 {{ rating_class }}" style="font-size: 2.5rem;">{{
+                                    "%.1f"|format(recipe.avg_rating) }}</h2>
+                                <div class="text-warning my-1">
+                                    {% for i in range(1, 6) %}
+                                    {% if i <= recipe.avg_rating|round(0, 'floor' ) %} <i class="fas fa-star"></i>
+                                        {% elif i == (recipe.avg_rating|round(0, 'ceil')) and recipe.avg_rating % 1 > 0
+                                        %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                        {% endfor %}
+                                </div>
+                            </div>
+                            {% else %}
+                            <h5 class="text-muted mb-0">No ratings yet</h5>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small mb-0">{{ recipe.rating_count or 0 }} community ratings</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Favorites Button -->
+            {% if session.user_id %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body text-center">
+                    <button type="button" id="favorite-btn"
+                        class="btn {% if is_favorited %}btn-danger{% else %}btn-outline-danger{% endif %} w-100"
+                        onclick="toggleFavorite(event, {{ recipe.id }})">
+                        <i class="fas fa-heart me-2"></i>
+                        <span id="fav-text">{% if is_favorited %}Remove from Favorites{% else %}Add to Favorites{% endif
+                            %}</span>
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Share -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-share-alt text-primary me-2"></i>Share Recipe
+                    </h5>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-primary" onclick="shareRecipe()">
+                            <i class="fas fa-link me-2"></i>Copy Link
+                        </button>
+                        <button class="btn btn-outline-info"
+                            onclick="window.open('https://www.facebook.com/sharer/sharer.php?u={{ request.url }}', '_blank')">
+                            <i class="fab fa-facebook me-2"></i>Share on Facebook
+                        </button>
+                        <button class="btn btn-outline-info"
+                            onclick="window.open('https://twitter.com/intent/tweet?url={{ request.url }}&text=Check out this recipe: {{ recipe.title }}', '_blank')">
+                            <i class="fab fa-twitter me-2"></i>Share on Twitter
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Recipes -->
+            {% if related_recipes %}
+            <div class="card border-0 shadow-sm related-recipes-card mb-4 overflow-hidden">
+                <div class="card-header bg-white border-0 py-3">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-utensils text-primary me-2"></i>Related Recipes
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="list-group list-group-flush">
+                        {% for related in related_recipes %}
+                        <a href="{{ url_for('view_recipe', recipe_id=related.id) }}"
+                            class="list-group-item list-group-item-action border-0 p-3 related-item">
+                            <div class="d-flex align-items-center">
+                                <div class="related-thumb-wrapper me-3">
+                                    {% if related.image_url %}
+                                    <img src="{{ url_for('uploaded_file', filename=related.image_url) }}"
+                                        alt="{{ related.title }}" class="related-thumb">
+                                    {% else %}
+                                    <img src="https://picsum.photos/seed/recipe{{ related.id }}/100/100.jpg"
+                                        alt="{{ related.title }}" class="related-thumb">
+                                    {% endif %}
+                                </div>
+                                <div class="related-info">
+                                    <h6 class="fw-bold mb-1 text-truncate" style="max-width: 180px;">{{ related.title }}
+                                    </h6>
+                                    <div class="text-warning small mb-1">
+                                        {% set r_rating = related.avg_rating|default(0) %}
+                                        {% for i in range(1, 6) %}
+                                        {% if r_rating >= i %}
+                                        <i class="fas fa-star"></i>
+                                        {% elif r_rating >= i - 0.5 %}
+                                        <i class="fas fa-star-half-alt"></i>
+                                        {% else %}
+                                        <i class="far fa-star"></i>
+                                        {% endif %}
+                                        {% endfor %}
+                                        <span class="text-muted ms-1" style="font-size: 0.7rem;">({{
+                                            related.rating_count }})</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <p class="text-muted tiny-text mb-0">by {{ related.username }}</p>
+                                        <div onclick="event.preventDefault(); window.open('{{ url_for('view_recipe', recipe_id=related.id, print='true') }}', '_blank');"
+                                            class="text-primary small" style="cursor: pointer;" title="Print Recipe">
+                                            <i class="fas fa-print"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Chef Spotlight -->
+            <div class="card border-0 shadow-sm spotlight-card mb-4 overflow-hidden">
+                <div class="card-body p-4 text-center">
+                    <div class="author-image-wrapper mb-3 mx-auto">
+                        {% if recipe.author_image %}
+                        <img src="{{ url_for('uploaded_file', filename=recipe.author_image) }}"
+                            alt="{{ recipe.username }}" class="author-img-large shadow-sm">
+                        {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ recipe.username }}&background=6366f1&color=fff&size=128"
+                            alt="{{ recipe.username }}" class="author-img-large shadow-sm">
+                        {% endif %}
+                    </div>
+                    <h5 class="fw-bold mb-1">{{ recipe.first_name }} {{ recipe.last_name }}</h5>
+                    <p class="text-muted small mb-3">@{{ recipe.username }}</p>
+                    {% if recipe.bio %}
+                    <p class="author-bio small mb-4 text-muted">{{ recipe.bio }}</p>
+                    {% endif %}
+                    <div class="d-grid">
+                        <button id="followBtn" onclick="toggleFollow({{ recipe.user_id }})"
+                            class="btn btn-{{ 'outline-' if is_following else '' }}primary rounded-pill fw-bold">
+                            {{ 'Following' if is_following else 'Follow Chef' }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cooking Tips -->
+            <div class="card border-0 shadow-sm mb-4 bg-primary text-white tip-card" style="min-height: 140px;">
+                <div class="card-body p-4 d-flex flex-column justify-content-center">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb me-2"></i>Quick Tip</h6>
+                    <p class="small mb-0 opacity-90">
+                        Always read the entire recipe before you start. It helps you prepare your ingredients and tools
+                        ahead of time for a smoother cooking experience!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-4">
+                        <i class="fas fa-comments text-primary me-2"></i>Reviews & Comments
+                    </h5>
+
+                    {% if session.user_id %}
+                    <form method="POST" action="{{ url_for('add_review', recipe_id=recipe.id) }}" class="mb-4">
+                        <div class="mb-3">
+                            <label class="form-label">Your Review</label>
+                            <textarea class="form-control" name="comment" rows="3" required
+                                placeholder="Share your thoughts about this recipe..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane me-2"></i>Post Review
+                        </button>
+                    </form>
+                    {% else %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <a href="{{ url_for('login') }}">Login</a> to leave a review
+                    </div>
+                    {% endif %}
+
+                    {% if reviews %}
+                    <div class="reviews-list">
+                        {% for r in reviews %}
+                        <div class="review-item border-bottom pb-4 mb-4" data-aos="fade-up">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="d-flex align-items-center">
+                                    <div class="review-avatar me-3">
+                                        <img src="https://ui-avatars.com/api/?name={{ r.username }}&background=random&color=fff&size=48"
+                                            alt="{{ r.username }}" class="rounded-circle shadow-sm">
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark">{{ r.username }}</h6>
+                                        <div class="text-warning small">
+                                            {% for i in range(1, 6) %}
+                                            {% if i <= r.rating %} <i class="fas fa-star"></i>
+                                                {% else %}
+                                                <i class="far fa-star text-muted opacity-25"></i>
+                                                {% endif %}
+                                                {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="review-meta text-end">
+                                    <small class="text-muted d-block">{{ r.created_at.strftime('%B %d, %Y')
+                                        }}</small>
+                                </div>
+                            </div>
+                            <div class="review-content bg-light p-3 rounded-3 position-relative">
+                                <i class="fas fa-quote-left text-primary opacity-10 position-absolute top-0 start-0 m-2"
+                                    style="font-size: 1.5rem;"></i>
+                                <p class="mb-0 text-dark-custom ps-3">
+                                    {% if r.review %}
+                                    {{ r.review|nl2br }}
+                                    {% else %}
+                                    <span class="text-muted fst-italic small">Rated with stars only.</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+
+                            <!-- Author Reply Display -->
+                            {% if r.author_reply %}
+                            <div class="author-reply-container shadow-sm border-0" data-aos="fade-left">
+                                <div class="chef-badge">Chef Response</div>
+                                <p class="mb-2 text-dark small" style="line-height: 1.5;">{{ r.author_reply|nl2br }}</p>
+                                <div class="text-muted" style="font-size: 0.65rem;">
+                                    <i class="fas fa-clock me-1"></i>Replied on {{ r.replied_at.strftime('%B %d, %Y') }}
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Author Reply Form (Only for Recipe Author) -->
+                            {% if session.user_id and session.user_id == recipe.user_id %}
+                            <div class="mt-3 text-end">
+                                <button class="btn btn-link btn-sm text-primary fw-bold text-decoration-none p-0"
+                                    type="button" data-bs-toggle="collapse" data-bs-target="#replyForm{{ r.id }}">
+                                    <i class="fas fa-reply me-1"></i>
+                                    {% if r.author_reply %}Edit Response{% else %}Send Response{% endif %}
+                                </button>
+                            </div>
+                            <div class="collapse" id="replyForm{{ r.id }}">
+                                <div class="reply-form-wrapper shadow-sm">
+                                    <form action="{{ url_for('author_reply_review', review_id=r.id) }}" method="POST">
+                                        <div class="mb-3">
+                                            <label class="form-label small fw-bold">Your Response to {{ r.username
+                                                }}</label>
+                                            <textarea class="form-control form-control-sm" name="reply_content" rows="3"
+                                                placeholder="Write a professional response..."
+                                                required>{{ r.author_reply if r.author_reply else '' }}</textarea>
+                                        </div>
+                                        <div class="text-end">
+                                            <button type="submit" class="btn-reply-submit">
+                                                <i class="fas fa-paper-plane me-1"></i>Submit Response
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 bg-light rounded-4">
+                        <div class="mb-3">
+                            <i class="fas fa-comment-alt-slash fa-4x text-muted opacity-25"></i>
+                        </div>
+                        <h6 class="fw-bold text-muted mb-2">No reviews yet</h6>
+                        <p class="text-muted small mb-0">Be the first to share your culinary experience!</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🖨️ PRINT-ONLY RECIPE CARD (Hidden on screen) -->
+<div id="printRecipeCard" style="display: none;">
+    <div class="prc-site-tag">NEPAL's Stories • Culinary Journeys</div>
+
+    <h1 class="prc-title">{{ recipe.title }}</h1>
+
+    <div class="prc-meta">
+        <span>By <strong>{{ recipe.username }}</strong></span>
+        <span class="prc-dot">•</span>
+        <span>{{ recipe.category_name }}</span>
+        <span class="prc-dot">•</span>
+        <span>{{ recipe.created_at.strftime('%B %d, %Y') }}</span>
+        {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+        <span class="prc-dot">•</span>
+        <span>Rating: {{ "%.1f"|format(recipe.avg_rating) }}/5.0</span>
+        {% endif %}
+    </div>
+
+    <!-- Stats Row -->
+    <div class="prc-stats">
+        {% if recipe.prep_time %}
+        <div class="prc-stat">
+            <span class="prc-stat-icon">⏱️</span>
+            <span class="prc-stat-label">Prep Time</span>
+            <span class="prc-stat-val">{{ recipe.prep_time }}m</span>
+        </div>
+        {% endif %}
+        {% if recipe.cook_time %}
+        <div class="prc-stat">
+            <span class="prc-stat-icon">🔥</span>
+            <span class="prc-stat-label">Cook Time</span>
+            <span class="prc-stat-val">{{ recipe.cook_time }}m</span>
+        </div>
+        {% endif %}
+        {% if recipe.prep_time and recipe.cook_time %}
+        <div class="prc-stat">
+            <span class="prc-stat-icon">🥘</span>
+            <span class="prc-stat-label">Total Time</span>
+            <span class="prc-stat-val">{{ (recipe.prep_time|int + recipe.cook_time|int) }}m</span>
+        </div>
+        {% endif %}
+        {% if recipe.servings %}
+        <div class="prc-stat">
+            <span class="prc-stat-icon">🍽️</span>
+            <span class="prc-stat-label">Servings</span>
+            <span class="prc-stat-val">{{ recipe.servings }}</span>
+        </div>
+        {% endif %}
+        {% if recipe.difficulty %}
+        <div class="prc-stat">
+            <span class="prc-stat-icon">📊</span>
+            <span class="prc-stat-label">Difficulty</span>
+            <span class="prc-stat-val">{{ recipe.difficulty }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if recipe.description %}
+    <div class="prc-description">
+        {{ recipe.description }}
+    </div>
+    {% endif %}
+
+    <div class="prc-body">
+        <!-- Ingredients column -->
+        <div class="prc-column">
+            <h3 class="prc-section-title">Ingredients</h3>
+            <ul class="prc-ingredient-list">
+                {% for ingredient in recipe.ingredients.split('\n') if ingredient.strip() %}
+                <li>{{ ingredient.strip() }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Instructions column -->
+        <div class="prc-column">
+            <h3 class="prc-section-title">Instructions</h3>
+            <ol class="prc-instruction-list">
+                {% for instruction in recipe.instructions.split('\n') if instruction.strip() %}
+                <li>{{ instruction.strip() }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+
+    <div class="prc-footer">
+        <i class="fas fa-mountain"></i>
+        <span>Printed from <strong>NEPAL's Stories</strong> • Discover more at {{ request.url_root }}</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript">
+    function shareRecipe() {
+        navigator.clipboard.writeText(window.location.href).then(function () {
+            alert('Recipe link copied to clipboard!');
+        });
+    }
+
+    function toggleFavorite(event, recipeId) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const btn = document.getElementById('favorite-btn');
+        const text = document.getElementById('fav-text');
+
+        fetch(`/recipe/${recipeId}/favorite`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                if (data.is_favorited) {
+                    btn.classList.remove('btn-outline-danger');
+                    btn.classList.add('btn-danger');
+                    text.innerText = 'Remove from Favorites';
+                } else {
+                    btn.classList.remove('btn-danger');
+                    btn.classList.add('btn-outline-danger');
+                    text.innerText = 'Add to Favorites';
+                }
+
+                Swal.fire({
+                    title: 'Updated!',
+                    text: data.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            })
+            .catch(error => {
+                console.error('Error toggling favorite:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Could not update favorites. Please try again.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+    }
+
+    function toggleFollow(userId) {
+        fetch(`/profile/toggle-follow/${userId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "{{ url_for('login') }}";
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                if (data.success) {
+                    const btn = document.getElementById('followBtn');
+                    if (data.following) {
+                        btn.classList.remove('btn-primary');
+                        btn.classList.add('btn-outline-primary');
+                        btn.innerText = 'Following';
+                    } else {
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-primary');
+                        btn.innerText = 'Follow Chef';
+                    }
+
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 2000,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else if (data.error) {
+                    Swal.fire({
+                        title: 'Oops!',
+                        text: data.error,
+                        icon: 'error',
+                        timer: 3000,
+                        showConfirmButton: true
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling follow:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+    }
+
+    function deleteRecipe(recipeId, recipeTitle) {
+        if (confirm('Are you sure you want to delete "' + recipeTitle + '"? This action cannot be undone.')) {
+            fetch('/recipe/' + recipeId + '/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.href = '/';
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+    }
+
+    function removeRating(recipeId) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You are about to remove your rating and review.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, remove it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch(`/recipe/${recipeId}/remove-rating`, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'Removed!',
+                                text: data.message,
+                                icon: 'success',
+                                timer: 2000,
+                                showConfirmButton: false
+                            }).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', data.message || 'Could not remove rating.', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error removing rating:', error);
+                        Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
+                    });
+            }
+        });
+    }
+
+    // Print Recipe logic
+    function printRecipe() {
+        window.print();
+    }
+
+    // Auto-trigger print if URL contains ?print=true
+    document.addEventListener('DOMContentLoaded', function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('print') === 'true') {
+            // Give a tiny delay for everything to settle
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+    });
+</script>
+
+<style>
+    .recipe-image-container {
+        width: 100%;
+        height: 500px;
+        background-color: #f0f0f0;
+        overflow: hidden;
+        border-radius: 12px 12px 0 0;
+        display: block;
+        /* Standard block for clean rendering */
+    }
+
+    .main-recipe-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        image-rendering: auto;
+        /* Return to default clean browser rendering */
+        display: block;
+        transition: none !important;
+    }
+
+    .difficulty-badge {
+        font-size: 0.8rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius);
+    }
+
+    .difficulty-easy {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    .difficulty-medium {
+        background: #fed7aa;
+        color: #92400e;
+    }
+
+    .difficulty-hard {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    .instructions .d-flex {
+        position: relative;
+    }
+
+    .instructions .d-flex::before {
+        content: '';
+        position: absolute;
+        left: 15px;
+        top: 30px;
+        bottom: 0;
+        width: 2px;
+        background: #e5e7eb;
+    }
+
+    .instructions .d-flex:last-child::before {
+        display: none;
+    }
+
+    /* Related Recipes Styles */
+    .related-recipes-card {
+        border-radius: 15px !important;
+    }
+
+    .related-item {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid #f8f9fa !important;
+    }
+
+    .related-item:hover {
+        background-color: #f8f9fa !important;
+        padding-left: 1.25rem !important;
+    }
+
+    .related-thumb-wrapper {
+        width: 65px;
+        height: 65px;
+        flex-shrink: 0;
+        border-radius: 10px;
+        overflow: hidden;
+        border: 1px solid #eee;
+    }
+
+    .related-thumb {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Chef Spotlight Styles */
+    .author-img-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid #fff;
+    }
+
+    .spotlight-card {
+        border-radius: 20px !important;
+    }
+
+    .author-bio {
+        line-height: 1.6;
+    }
+
+    /* Conversion Table Styles */
+    .conversion-table span {
+        font-weight: 500;
+    }
+
+    .tiny-text {
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: #4b5563;
+    }
+
+    /* Review Styles */
+    .review-item {
+        transition: transform 0.3s ease;
+    }
+
+    .review-item:last-child {
+        border-bottom: none !important;
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+    }
+
+    .review-avatar img {
+        width: 48px;
+        height: 48px;
+        object-fit: cover;
+    }
+
+    .review-content {
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .text-dark-custom {
+        color: #2d3436;
+        line-height: 1.6;
+    }
+
+    .opacity-10 {
+        opacity: 0.1;
+    }
+
+    :root {
+        --primary-orange: #ff6b35;
+    }
+
+    /* Author Reply Styles */
+    .author-reply-container {
+        border-left: 4px solid var(--primary-orange);
+        background: #fffafa;
+        margin-top: 1.25rem;
+        margin-left: 2rem;
+        padding: 1.5rem;
+        border-radius: 12px;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(255, 107, 53, 0.05);
+    }
+
+    .chef-badge {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary-orange), #ff8c5f);
+        color: white;
+        padding: 0.3rem 0.8rem;
+        border-radius: 6px;
+        margin-bottom: 0.75rem;
+        display: inline-block;
+        box-shadow: 0 4px 10px rgba(255, 107, 53, 0.2);
+    }
+
+    .reply-form-wrapper {
+        margin-top: 1.5rem;
+        margin-left: 2rem;
+        padding: 1.5rem;
+        background: #ffffff;
+        border-radius: 15px;
+        border: 1px solid #edf2f7;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-reply-submit {
+        background: linear-gradient(135deg, var(--primary-orange), #ff8c5f);
+        border: none;
+        color: white !important;
+        font-weight: 800;
+        padding: 0.6rem 2rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 15px rgba(255, 107, 53, 0.2);
+        cursor: pointer;
+    }
+
+    .btn-reply-submit:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 12px 20px rgba(255, 107, 53, 0.3);
+        background: linear-gradient(135deg, #e65a2d, #ff6b35);
+    }
+
+    /* ══════════════════════════════════════════════════════════════════
+       @media print — Show ONLY the #printRecipeCard
+    ══════════════════════════════════════════════════════════════════ */
+    @media print {
+
+        /* Hide page chrome ─────────────────────────────────────── */
+        nav,
+        footer,
+        .navbar,
+        .container.py-4,
+        .alert,
+        .hero-section {
+            display: none !important;
+        }
+
+        /* Keep main visible (it wraps #printRecipeCard too) */
+        main {
+            display: block !important;
+        }
+
+        /* Hide the print card on screen but show when printing */
+        #printRecipeCard {
+            display: block !important;
+        }
+
+        /* Reset body for clean print */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #fff !important;
+            color: #111 !important;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            font-size: 11pt;
+        }
+
+        /* ── Print Card wrapper ───────────────────────────── */
+        #printRecipeCard {
+            max-width: 100%;
+            padding: 0.5in 0.6in;
+            box-sizing: border-box;
+        }
+
+        /* ── Site tag ─────────────────────────────────────── */
+        .prc-site-tag {
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #777;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 6pt;
+            margin-bottom: 10pt;
+        }
+
+        /* ── Recipe title ─────────────────────────────────── */
+        .prc-title {
+            font-family: 'Georgia', serif;
+            font-size: 28pt;
+            font-weight: bold;
+            margin: 0 0 6pt 0;
+            line-height: 1.1;
+            color: #111;
+        }
+
+        /* ── Meta line ────────────────────────────────────── */
+        .prc-meta {
+            font-size: 9.5pt;
+            color: #555;
+            margin-bottom: 12pt;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6pt;
+            align-items: center;
+        }
+
+        .prc-dot {
+            color: #bbb;
+        }
+
+        /* ── Stats row ────────────────────────────────────── */
+        .prc-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10pt;
+            background: #f7f7f7;
+            border: 1px solid #e0e0e0;
+            border-radius: 6pt;
+            padding: 8pt 12pt;
+            margin-bottom: 14pt;
+        }
+
+        .prc-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 60pt;
+            text-align: center;
+        }
+
+        .prc-stat-icon {
+            font-size: 14pt;
+            line-height: 1;
+            margin-bottom: 2pt;
+        }
+
+        .prc-stat-label {
+            font-size: 7pt;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #888;
+        }
+
+        .prc-stat-val {
+            font-size: 10.5pt;
+            font-weight: bold;
+            color: #222;
+        }
+
+        /* ── Description ──────────────────────────────────── */
+        .prc-description {
+            font-size: 10pt;
+            color: #444;
+            font-style: italic;
+            border-left: 3pt solid #c0392b;
+            padding-left: 10pt;
+            margin-bottom: 14pt;
+        }
+
+        /* ── Two-column body ──────────────────────────────── */
+        .prc-body {
+            display: grid;
+            grid-template-columns: 1fr 1.6fr;
+            gap: 20pt;
+            margin-bottom: 14pt;
+        }
+
+        /* ── Section headings ─────────────────────────────── */
+        .prc-section-title {
+            font-family: 'Georgia', serif;
+            font-size: 13pt;
+            font-weight: bold;
+            color: #c0392b;
+            margin: 0 0 8pt 0;
+            padding-bottom: 4pt;
+            border-bottom: 1.5pt solid #c0392b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── Ingredients list ─────────────────────────────── */
+        .prc-ingredient-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .prc-ingredient-list li {
+            padding: 3pt 0 3pt 14pt;
+            position: relative;
+            font-size: 9.5pt;
+            border-bottom: 0.5pt solid #eee;
+            color: #222;
+        }
+
+        .prc-ingredient-list li::before {
+            content: '✦';
+            position: absolute;
+            left: 0;
+            color: #c0392b;
+            font-size: 7pt;
+            top: 5pt;
+        }
+
+        /* ── Instructions list ────────────────────────────── */
+        .prc-instruction-list {
+            margin: 0;
+            padding-left: 18pt;
+        }
+
+        .prc-instruction-list li {
+            font-size: 9.5pt;
+            margin-bottom: 6pt;
+            color: #222;
+            line-height: 1.4;
+        }
+
+        .prc-instruction-list li::marker {
+            color: #c0392b;
+            font-weight: bold;
+        }
+
+        /* ── Footer ───────────────────────────────────────── */
+        .prc-footer {
+            border-top: 1pt solid #ccc;
+            padding-top: 6pt;
+            font-size: 8pt;
+            color: #999;
+            display: flex;
+            gap: 8pt;
+            align-items: center;
+        }
+
+        @page {
+            margin: 0.5in;
+        }
+    }
+</style>
+{% endblock %}

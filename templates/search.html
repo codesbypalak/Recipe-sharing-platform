@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<!-- Modern Search Header -->
+<div class="hero-section py-5 mb-5"
+    style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); position: relative;">
+    <!-- Back Button -->
+    <div class="container position-absolute top-0 start-0 mt-4 ms-2 ms-md-4" style="z-index: 100;">
+        <a href="{{ url_for('index') }}"
+            class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+            style="width: 45px; height: 45px; border: none; transition: all 0.3s ease; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+
+    <div class="container text-center">
+        <h1 class="display-5 fw-900 text-white mb-3" style="font-family: 'Merriweather', serif;">
+            {% if query %}Results for <span style="color: #ff6b35;">"{{ query }}"</span>{% else %}Find Your Next <span
+                style="color: #ff6b35;">Favorite</span>{% endif %}
+        </h1>
+        <p class="text-white-50 lead mb-4">Discover curated culinary stories and amazing flavors.</p>
+
+        <!-- Centered Search Form -->
+        <div class="row justify-content-center">
+            <div class="col-lg-6 col-md-8">
+                <form action="{{ url_for('search') }}" method="GET"
+                    class="d-flex gap-2 p-2 bg-white rounded-pill shadow-lg">
+                    <input type="text" name="q" class="form-control border-0 bg-transparent ps-4 py-2"
+                        placeholder="Search recipes..." value="{{ query }}" style="box-shadow: none;">
+
+                    <div class="vr my-2 text-muted opacity-25"></div>
+
+                    <select name="category" class="form-select border-0 bg-transparent w-auto"
+                        style="box-shadow: none; cursor: pointer;" onchange="this.form.submit()">
+                        <option value="">All Categories</option>
+                        {% for category in categories %}
+                        <option value="{{ category.id }}" {% if selected_category|string==category.id|string
+                            %}selected{% endif %}>
+                            {{ category.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+
+                    <button type="submit" class="btn btn-primary rounded-pill px-4"
+                        style="background: #ff6b35; border: none;">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container mb-5">
+    <!-- Users/Chefs Section -->
+    {% if users %}
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="section-title mb-0" style="font-size: 1.5rem;">Chefs found</h3>
+            <span class="text-muted small fw-bold text-uppercase">{{ users|length }} chefs</span>
+        </div>
+
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
+            {% for found_user in users %}
+            <div class="col">
+                <a href="{{ url_for('profile', username=found_user.username) }}" class="text-decoration-none">
+                    <div class="card h-100 border-0 shadow-sm text-center py-4"
+                        style="transition: transform 0.3s ease;">
+                        <div class="card-body d-flex flex-column align-items-center justify-content-center">
+                            {% if found_user.profile_image %}
+                            <img src="{{ url_for('uploaded_file', filename=found_user.profile_image) }}"
+                                alt="{{ found_user.username }}" class="rounded-circle mb-3 object-fit-cover shadow-sm"
+                                style="width: 80px; height: 80px;">
+                            {% else %}
+                            <div class="rounded-circle bg-primary-custom d-flex align-items-center justify-content-center mb-3 shadow-sm mx-auto"
+                                style="width: 80px; height: 80px; background-color: #0066b2 !important; color: white; font-size: 1.8rem; font-weight: bold;">
+                                {{ found_user.username[0]|upper }}
+                            </div>
+                            {% endif %}
+                            <h5 class="card-title text-dark fw-bold mb-1">{{ found_user.username }}</h5>
+                            <span class="btn btn-sm btn-outline-primary rounded-pill mt-3 px-3">View Profile</span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Recipe Results Section -->
+    {% if recipes %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="section-title mb-0" style="font-size: 1.5rem;">Discovery results</h3>
+        <span class="text-muted small fw-bold text-uppercase">{{ recipes|length }} recipes found</span>
+    </div>
+
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for recipe in recipes %}
+        <div class="col">
+            <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="text-decoration-none">
+                <div class="recipe-card h-100">
+                    <div class="recipe-image-wrapper">
+                        {% if recipe.image_url %}
+                        <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}" alt="{{ recipe.title }}">
+                        {% else %}
+                        <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/400/400.jpg"
+                            alt="{{ recipe.title }}">
+                        {% endif %}
+
+                        <div class="recipe-overlay">
+                            <h5>{{ recipe.title }}</h5>
+                        </div>
+                    </div>
+
+                    <div class="recipe-meta">
+                        <div class="left-meta">
+                            <div class="recipe-author">
+                                <span class="author-initial">{{ recipe.username[0]|upper }}</span>
+                                <span>{{ recipe.username }}</span>
+                            </div>
+                            <div class="recipe-time mt-1">
+                                <i class="far fa-clock me-1"></i>{{ recipe.prep_time }} mins
+                            </div>
+                        </div>
+
+                        <div class="right-meta">
+                            <div class="recipe-favorite {% if recipe.id in user_favorites %}active{% endif %}"
+                                data-recipe-id="{{ recipe.id }}" onclick="toggleFavorite(event, this)">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <a href="{{ url_for('view_recipe', recipe_id=recipe.id, print='true') }}"
+                                class="recipe-print" target="_blank" title="Print Recipe"
+                                onclick="event.stopPropagation();">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+                            <div class="recipe-rating-stars">
+                                {% set rating = recipe.avg_rating|default(0) %}
+                                {% for i in range(1, 6) %}
+                                {% if rating >= i %}
+                                <i class="fas fa-star"></i>
+                                {% elif rating >= i - 0.5 %}
+                                <i class="fas fa-star-half-alt"></i>
+                                {% else %}
+                                <i class="far fa-star"></i>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if not recipes and not users %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+                <i class="fas fa-search fa-3x" style="color: #ff6b35; opacity: 0.5;"></i>
+            </div>
+            <h2 class="fw-bold" style="font-family: 'Merriweather', serif;">No results found</h2>
+            <p class="text-muted lead mx-auto" style="max-width: 500px;">
+                We couldn't find any recipes or chefs matching your search. Why not try a different keyword or explore
+                our categories?
+            </p>
+        </div>
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{{ url_for('index') }}" class="btn btn-outline-dark rounded-pill px-4">
+                <i class="fas fa-home me-2"></i>Back to Home
+            </a>
+            {% if session.user_id %}
+            <a href="{{ url_for('create_recipe') }}" class="btn btn-primary rounded-pill px-4">
+                <i class="fas fa-plus me-2"></i>Share a Recipe
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .fw-900 {
+        font-weight: 900;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleFavorite(event, element) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const recipeId = element.dataset.recipeId;
+
+        fetch(`/recipe/${recipeId}/favorite`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+                element.classList.toggle('active');
+
+                // Show a small toast notification or feedback
+                Swal.fire({
+                    title: 'Updated!',
+                    text: data.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            })
+            .catch(error => {
+                console.error('Error toggling favorite:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Could not update favorites. Please try again.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.recipe-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}NEPAL's Stories{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <h1>Discover Amazing Recipes</h1>
+        <p>Share your culinary journey and explore delicious recipes from our community</p>
+        {% if 'user_id' in session %}
+        <a href="{{ url_for('create_recipe') }}" class="btn btn-light btn-lg">
+            Create Recipe
+        </a>
+        {% else %}
+        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">
+            Join Our Community
+        </a>
+        <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+            Login
+        </a>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Overlapping Categories -->
+<div class="category-section-wrapper">
+    <div class="container">
+        <div class="category-grid">
+            {% for category in categories %}
+            <a href="{{ url_for('search') }}?category={{ category.id }}" class="category-card">
+                <i class="fas fa-{{ category.icon or 'utensils' }}"></i>
+                <span>{{ category.name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container">
+    <!-- Latest Recipes -->
+    <section class="my-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0"
+                style="font-family: 'Merriweather', serif; font-weight: 900; letter-spacing: -0.5px;">Latest Recipes
+            </h2>
+            <a href="{{ url_for('search') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3">
+                View All
+            </a>
+        </div>
+
+        {% if recipes %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for recipe in recipes %}
+            <div class="col">
+                <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="text-decoration-none">
+                    <div class="recipe-card h-100">
+                        <div class="recipe-image-wrapper">
+                            {% if recipe.image_url %}
+                            <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                                alt="{{ recipe.title }}">
+                            {% else %}
+                            <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/400/400.jpg"
+                                alt="{{ recipe.title }}">
+                            {% endif %}
+
+                            <div class="recipe-overlay">
+                                <h5>{{ recipe.title }}</h5>
+                            </div>
+                        </div>
+
+                        <div class="recipe-meta">
+                            <div class="left-meta">
+                                <div class="recipe-author">
+                                    <span class="author-initial">{{ recipe.username[0]|upper }}</span>
+                                    <span>{{ recipe.username }}</span>
+                                </div>
+                                <div class="recipe-time mt-1">
+                                    <i class="far fa-clock me-1"></i>{{ recipe.prep_time }}m ago
+                                </div>
+                            </div>
+
+                            <div class="right-meta">
+                                <div class="recipe-favorite {% if recipe.id in user_favorites %}active{% endif %}"
+                                    data-recipe-id="{{ recipe.id }}" onclick="toggleFavorite(event, this)">
+                                    <i class="fas fa-heart"></i>
+                                </div>
+                                <a href="{{ url_for('view_recipe', recipe_id=recipe.id, print='true') }}"
+                                    class="recipe-print" target="_blank" title="Print Recipe"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+                                <div class="recipe-rating-stars">
+                                    {% set rating = recipe.avg_rating|default(0) %}
+                                    {% for i in range(1, 6) %}
+                                    {% if rating >= i %}
+                                    <i class="fas fa-star"></i>
+                                    {% elif rating >= i - 0.5 %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted-custom mb-3"></i>
+            <h4 class="text-muted-custom">No recipes yet</h4>
+            <p class="text-muted-custom">Be the first to share a delicious recipe!</p>
+            {% if 'user_id' in session %}
+            <a href="{{ url_for('create_recipe') }}" class="btn btn-primary">
+                Create First Recipe
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Stats Section -->
+    <section class="my-5">
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-book"></i>
+                    <h3>{{ total_recipes_count }}</h3>
+                    <p>Total Recipes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-users"></i>
+                    <h3>{{ categories|length }}</h3>
+                    <p>Categories</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-star"></i>
+                    <h3>{{ global_avg_rating|round(1) }}</h3>
+                    <p>Avg Rating</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-heart"></i>
+                    <h3 id="global-fav-count">{{ total_favorites }}</h3>
+                    <p>Favorites</p>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function toggleFavorite(event, element) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const recipeId = element.dataset.recipeId;
+
+        fetch(`/recipe/${recipeId}/favorite`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+                element.classList.toggle('active');
+
+                // Show a small toast notification or feedback
+                Swal.fire({
+                    title: 'Updated!',
+                    text: data.message,
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            })
+            .catch(error => {
+                console.error('Error toggling favorite:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Could not update favorites. Please try again.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+    }
+
+    // Add subtle animations on scroll
+    document.addEventListener('DOMContentLoaded', function () {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function (entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.recipe-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(card);
+        });
+    });
+</script>
+{% endblock %}

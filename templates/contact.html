@@ -1,0 +1,262 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Us - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<div class="contact-split-wrapper">
+    <div class="container-fluid p-0">
+        <div class="row g-0">
+            <!-- Left Panel: Immersive Image -->
+            <div class="col-lg-5 contact-left-panel position-relative d-none d-lg-block" data-aos="fade-right">
+                <div class="panel-overlay"></div>
+                <div class="panel-bg panel-contact-bg"></div>
+
+                <div class="panel-content p-5 text-white position-relative z-index-2 d-flex flex-column h-100">
+                    <div class="mb-4">
+                        <a href="{{ url_for('index') }}" class="btn-back">
+                            <i class="fas fa-arrow-left me-2"></i> BACK TO HOME
+                        </a>
+                    </div>
+
+                    <div class="px-lg-0 mt-2">
+                        <div class="pill-accent mb-4">GET IN TOUCH</div>
+                        <h1 class="display-4 fw-bold main-contact-title mb-4">
+                            Let's craft <br>
+                            something <br>
+                            delicious <br>
+                            together.
+                        </h1>
+                        <p class="lead opacity-80 mb-0 max-width-p">
+                            Whether you have a question about a recipe, feedback on our platform, or just want to swap
+                            stories, we'd love to hear from you.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel: Contact Form -->
+            <div class="col-lg-7 contact-right-panel bg-white p-5 d-flex align-items-center" data-aos="fade-left">
+                <div class="form-container mx-auto px-lg-5 py-4" style="max-width: 700px; width: 100%;">
+
+                    <div class="form-header mb-5">
+                        <h2 class="display-5 fw-bold mb-2">Send us a message</h2>
+                        <p class="text-muted">We usually respond within 24 hours.</p>
+                    </div>
+
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show mb-4"
+                        role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+
+                    <form action="{{ url_for('contact') }}" method="POST" class="needs-validation" novalidate>
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label-custom">FULL NAME</label>
+                                <input type="text" class="form-control-minimal" name="name" placeholder="John Doe"
+                                    required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label-custom">EMAIL ADDRESS</label>
+                                <input type="email" class="form-control-minimal" name="email"
+                                    placeholder="john@example.com" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label-custom">SUBJECT</label>
+                                <input type="text" class="form-control-minimal" name="subject"
+                                    placeholder="How can we help?" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label-custom">MESSAGE</label>
+                                <textarea class="form-control-minimal" name="message" rows="5"
+                                    placeholder="Tell us more..." required></textarea>
+                            </div>
+                            <div class="col-12 mt-5">
+                                <button type="submit" class="btn btn-dark-minimal px-5 py-3 rounded-pill">
+                                    Send Message <i class="fas fa-paper-plane ms-2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    .contact-split-wrapper {
+        font-family: 'Outfit', sans-serif;
+        background-color: #fff;
+    }
+
+    /* Layout override */
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    footer {
+        margin-top: 0 !important;
+    }
+
+
+    /* Left Panel Styles */
+    .contact-left-panel {
+        overflow: hidden;
+    }
+
+    .panel-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transition: transform 10s ease;
+    }
+
+    .panel-contact-bg {
+        background-image: url("{{ url_for('static', filename='images/contactfoodbg.avif') }}");
+    }
+
+    .contact-left-panel:hover .panel-bg {
+        transform: scale(1.1);
+    }
+
+    .panel-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.7));
+        z-index: 1;
+    }
+
+    .btn-back {
+        background: white;
+        color: #1a1a1a;
+        padding: 10px 20px;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-decoration: none;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .pill-accent {
+        display: inline-block;
+        padding: 5px 20px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 50px;
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+
+    .main-contact-title {
+        font-family: 'Merriweather', serif;
+        line-height: 1.1;
+        letter-spacing: -2px;
+    }
+
+    .text-primary-accent {
+        color: #ff6b35 !important;
+    }
+
+    .max-width-p {
+        max-width: 450px;
+        line-height: 1.6;
+    }
+
+    /* Right Panel Styles */
+    .contact-right-panel {
+        background: #fff;
+    }
+
+    .form-header h2 {
+        font-family: 'Merriweather', serif;
+    }
+
+    .form-label-custom {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #333;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+    }
+
+    .form-control-minimal {
+        width: 100%;
+        border: none;
+        background: #f8f9fa;
+        padding: 18px 25px;
+        border-radius: 12px;
+        font-size: 0.95rem;
+        color: #1a1a1a;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-minimal:focus {
+        outline: none;
+        background: #fff;
+        box-shadow: 0 0 0 2px #ff6b35, 0 10px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .btn-dark-minimal {
+        background: #1a1a1a;
+        color: white;
+        border: none;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-dark-minimal:hover {
+        background: #ff6b35;
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+    }
+
+    .z-index-2 {
+        z-index: 2;
+    }
+
+    @media (max-width: 991px) {
+        .contact-right-panel {
+            padding: 3rem 1.5rem !important;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+{% endblock %}

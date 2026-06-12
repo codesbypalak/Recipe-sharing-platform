@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Frequently Asked Questions - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<!-- FAQ Hero Section -->
+<section class="hero-section py-5 mb-5"
+    style="background: linear-gradient(135deg, #1a1a1a 0%, #333 100%); position: relative;">
+    <!-- Back Button -->
+    <div class="container position-absolute top-0 start-0 mt-4 ms-2 ms-md-4" style="z-index: 100;">
+        <a href="{{ url_for('index') }}"
+            class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+            style="width: 45px; height: 45px; border: none; transition: all 0.3s ease; background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); color: white;">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+    </div>
+    <div class="container text-center py-4">
+        <h1 class="display-4 fw-900 text-white mb-3" style="font-family: 'Merriweather', serif;">FAQ</h1>
+        <p class="text-white-50 lead mx-auto" style="max-width: 600px;">
+            Have questions? We've got answers. Explore our frequently asked questions to learn more about sharing and
+            discovering culinary stories.
+        </p>
+    </div>
+</section>
+
+<div class="container mb-5 pb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- FAQ Accordion -->
+            <div class="accordion accordion-flush shadow-sm rounded-4 overflow-hidden" id="faqAccordion">
+
+                <!-- Category: Getting Started -->
+                <div class="bg-light px-4 py-3 border-bottom">
+                    <h5 class="mb-0 fw-bold text-uppercase small tracking-wider" style="color: #ff6b35;">Getting Started
+                    </h5>
+                </div>
+
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold py-4 px-4 shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq-1">
+                            How do I create an account?
+                        </button>
+                    </h2>
+                    <div id="faq-1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body px-4 pb-4 pt-0 text-muted-custom">
+                            Creating an account is easy! Just click on the "Sign up" button in the top right corner of
+                            the page, fill in your details, and you're ready to start sharing your recipes.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold py-4 px-4 shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq-2">
+                            Is it free to share recipes?
+                        </button>
+                    </h2>
+                    <div id="faq-2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body px-4 pb-4 pt-0 text-muted-custom">
+                            Yes, absolutely! NEPAL's Stories is a community-driven platform, and sharing your culinary
+                            journey is completely free for everyone.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Recipes & Content -->
+                <div class="bg-light px-4 py-3 border-bottom mt-2">
+                    <h5 class="mb-0 fw-bold text-uppercase small tracking-wider" style="color: #ff6b35;">Recipes &
+                        Content</h5>
+                </div>
+
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold py-4 px-4 shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq-3">
+                            How do I upload photos for my recipes?
+                        </button>
+                    </h2>
+                    <div id="faq-3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body px-4 pb-4 pt-0 text-muted-custom">
+                            When creating or editing a recipe, you'll see an "Upload Image" section. You can drag and
+                            drop your photo or click to browse your files. We support high-quality images to make your
+                            recipes look their best!
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold py-4 px-4 shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq-4">
+                            Can I edit my recipes after posting?
+                        </button>
+                    </h2>
+                    <div id="faq-4" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body px-4 pb-4 pt-0 text-muted-custom">
+                            Of course! You can find all your shared recipes on your profile page. Simply click on the
+                            "Edit" button on any of your recipe cards to make updates.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Category: Community & Privacy -->
+                <div class="bg-light px-4 py-3 border-bottom mt-2">
+                    <h5 class="mb-0 fw-bold text-uppercase small tracking-wider" style="color: #ff6b35;">Community &
+                        Privacy</h5>
+                </div>
+
+                <div class="accordion-item border-0">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold py-4 px-4 shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq-5">
+                            How can I save recipes I like?
+                        </button>
+                    </h2>
+                    <div id="faq-5" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body px-4 pb-4 pt-0 text-muted-custom">
+                            You can "Favorite" any recipe by clicking the heart icon on the recipe card or the "Add to
+                            Favorites" button on the recipe details page. Your favorites will be saved to your profile
+                            for easy access.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item border-0 border-bottom">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold py-4 px-4 shadow-none" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#faq-6">
+                            Is my profile public?
+                        </button>
+                    </h2>
+                    <div id="faq-6" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body px-4 pb-4 pt-0 text-muted-custom">
+                            Yes, your profile page is public so other community members can discover the amazing recipes
+                            you've shared. However, your private account details like your email address remain strictly
+                            private.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Still have questions? -->
+            <div class="text-center mt-5 p-5 bg-light rounded-4">
+                <h4 class="fw-bold mb-3" style="font-family: 'Merriweather', serif;">Still have questions?</h4>
+                <p class="text-muted mb-4 text-balanced">
+                    We're here to help you on your culinary journey. If you couldn't find what you were looking for,
+                    feel free to reach out to our team.
+                </p>
+                <a href="{{ url_for('contact') }}" class="btn btn-primary rounded-pill px-5 py-2 fw-bold"
+                    style="background: #ff6b35; border: none;">
+                    Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .fw-900 {
+        font-weight: 900;
+    }
+
+    .tracking-wider {
+        letter-spacing: 0.1em;
+    }
+
+    .text-muted-custom {
+        color: #6c757d;
+        line-height: 1.6;
+    }
+
+    .accordion-button:not(.collapsed) {
+        background-color: transparent;
+        color: #ff6b35;
+    }
+
+    .accordion-button::after {
+        filter: grayscale(1) opacity(0.5);
+    }
+
+    .accordion-button:not(.collapsed)::after {
+        filter: none;
+    }
+
+    .text-balanced {
+        text-wrap: balance;
+    }
+</style>
+{% endblock %}

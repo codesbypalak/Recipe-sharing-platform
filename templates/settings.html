@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block title %}Settings - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <h2 class="fw-bold mb-4" style="font-family: 'Merriweather', serif;">Settings</h2>
+
+            <!-- Tabs Navigation -->
+            <ul class="nav nav-tabs mb-4 px-2" id="settingsTabs" role="tablist" style="border-bottom: 2px solid #eee;">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active px-4 py-3 fw-bold border-0 bg-transparent" id="profile-tab"
+                        data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile"
+                        aria-selected="true" style="color: var(--bs-body-color);">
+                        Profile
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 py-3 border-0 bg-transparent" id="security-tab" data-bs-toggle="tab"
+                        data-bs-target="#security" type="button" role="tab" aria-controls="security"
+                        aria-selected="false" style="color: #6c757d; font-weight: 500;">
+                        Security
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link px-4 py-3 border-0 bg-transparent" id="preferences-tab" data-bs-toggle="tab"
+                        data-bs-target="#preferences" type="button" role="tab" aria-controls="preferences"
+                        aria-selected="false" style="color: #6c757d; font-weight: 500;">
+                        Preferences
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tabs Content -->
+            <div class="tab-content" id="settingsTabContent">
+
+                <!-- Profile Tab -->
+                <div class="tab-pane fade show active" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="mb-1 fw-bold">Profile Information</h4>
+                            <p class="text-muted mb-4">Update your profile details and public avatar.</p>
+
+                            <form method="POST" action="{{ url_for('settings') }}" enctype="multipart/form-data">
+                                <input type="hidden" name="action" value="update_profile">
+
+                                <!-- Profile Image Upload -->
+                                <div
+                                    class="mb-4 text-center text-md-start d-flex flex-column flex-md-row align-items-center gap-4">
+                                    <div class="position-relative">
+                                        {% if user.profile_image %}
+                                        <img src="{{ url_for('uploaded_file', filename=user.profile_image) }}"
+                                            class="rounded-circle shadow-sm object-fit-cover" alt="Profile"
+                                            style="width: 100px; height: 100px; border: 3px solid #fff;">
+                                        {% else %}
+                                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center shadow-sm"
+                                            style="width: 100px; height: 100px; font-size: 40px; font-weight: bold; background-color: #ff6b35 !important;">
+                                            {{ user.username[0]|upper }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex-grow-1 w-100">
+                                        <label for="profile_image"
+                                            class="form-label fw-bold small text-uppercase text-muted">Profile
+                                            Photo</label>
+                                        <input type="file" class="form-control" name="profile_image" id="profile_image"
+                                            accept="image/*">
+                                        <div class="form-text small">Recommended: Square JPG, PNG. Max 5MB.</div>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="username" class="form-label fw-bold">Username</label>
+                                        <input type="text" class="form-control bg-light" id="username"
+                                            value="{{ user.username }}" disabled>
+                                        <div class="form-text">Username cannot be changed.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="email" class="form-label fw-bold">Email Address</label>
+                                        <input type="email" class="form-control bg-light" id="email"
+                                            value="{{ user.email }}" disabled>
+                                        <div class="form-text">Email cannot be changed.</div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label for="first_name" class="form-label fw-bold">First Name</label>
+                                        <input type="text" class="form-control" name="first_name" id="first_name"
+                                            value="{{ user.first_name or '' }}" placeholder="Enter first name">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="last_name" class="form-label fw-bold">Last Name</label>
+                                        <input type="text" class="form-control" name="last_name" id="last_name"
+                                            value="{{ user.last_name or '' }}" placeholder="Enter last name">
+                                    </div>
+
+                                    <div class="col-12">
+                                        <label for="bio" class="form-label fw-bold">Bio</label>
+                                        <textarea class="form-control" name="bio" id="bio" rows="4"
+                                            placeholder="Tell us a little bit about yourself...">{{ user.bio or '' }}</textarea>
+                                        <div class="form-text">Brief description for your profile.</div>
+                                    </div>
+                                </div>
+
+                                <div class="mt-4 border-top pt-4 text-end">
+                                    <button type="submit" class="btn btn-primary px-4 py-2"
+                                        style="background-color: #ff6b35; border-color: #ff6b35;">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Tab -->
+                <div class="tab-pane fade" id="security" role="tabpanel" aria-labelledby="security-tab">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="mb-1 fw-bold">Security</h4>
+                            <p class="text-muted mb-4">Update your password to keep your account secure.</p>
+
+                            <form method="POST" action="{{ url_for('settings') }}">
+                                <input type="hidden" name="action" value="change_password">
+
+                                <div class="mb-3">
+                                    <label for="current_password" class="form-label fw-bold">Current Password</label>
+                                    <input type="password" class="form-control" name="current_password"
+                                        id="current_password" required>
+                                </div>
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label for="new_password" class="form-label fw-bold">New Password</label>
+                                        <input type="password" class="form-control" name="new_password"
+                                            id="new_password" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="confirm_password" class="form-label fw-bold">Confirm New
+                                            Password</label>
+                                        <input type="password" class="form-control" name="confirm_password"
+                                            id="confirm_password" required>
+                                    </div>
+                                </div>
+
+                                <div class="border-top pt-4 text-end">
+                                    <button type="submit" class="btn btn-primary px-4 py-2"
+                                        style="background-color: #ff6b35; border-color: #ff6b35;">
+                                        Update Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Danger Zone -->
+                    <div class="card border-danger border-opacity-25 shadow-sm rounded-4 mt-4"
+                        style="background-color: #fff5f5;">
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="mb-1 fw-bold text-danger">Danger Zone</h4>
+                            <p class="text-muted mb-4">Irreversible actions for your account.</p>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong class="d-block text-dark">Delete Account</strong>
+                                    <span class="text-muted small">Once you delete your account, there is no going back.
+                                        Please be certain.</span>
+                                </div>
+                                <button type="button" class="btn btn-outline-danger" onclick="confirmDelete()">
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences Tab -->
+                <div class="tab-pane fade" id="preferences" role="tabpanel" aria-labelledby="preferences-tab">
+                    <div class="card border-0 shadow-sm rounded-4">
+                        <div class="card-body p-4 p-md-5">
+                            <h4 class="mb-1 fw-bold">Preferences</h4>
+                            <p class="text-muted mb-4">Customize your experience.</p>
+
+                            <form method="POST" action="{{ url_for('settings') }}">
+                                <input type="hidden" name="action" value="update_preferences">
+                                <div class="mb-4">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="email_notifications"
+                                            name="email_notifications" {{ 'checked' if user.email_notifications else ''
+                                            }}>
+                                        <label class="form-check-label fw-bold" for="email_notifications">Email
+                                            Notifications</label>
+                                        <div class="form-text mt-0">Receive emails about new comments on your recipes.
+                                        </div>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="newsletter"
+                                            name="newsletter" {{ 'checked' if user.newsletter else '' }}>
+                                        <label class="form-check-label fw-bold" for="newsletter">Weekly
+                                            Newsletter</label>
+                                        <div class="form-text mt-0">Get the best recipes of the week delivered to your
+                                            inbox.</div>
+                                    </div>
+
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="public_profile"
+                                            name="public_profile" {{ 'checked' if user.public_profile else '' }}>
+                                        <label class="form-check-label fw-bold" for="public_profile">Public
+                                            Profile</label>
+                                        <div class="form-text mt-0">Allow others to see your profile and recipes.</div>
+                                    </div>
+                                </div>
+
+                                <div class="border-top pt-4 text-end">
+                                    <button type="submit" class="btn btn-primary px-4 py-2"
+                                        style="background-color: #ff6b35; border-color: #ff6b35;">
+                                        Save Preferences
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .nav-tabs .nav-link {
+        transition: all 0.2s ease;
+    }
+
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: #ff6b35 !important;
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #ff6b35 !important;
+        border-bottom: 2px solid #ff6b35 !important;
+    }
+
+    .form-control:focus,
+    .form-check-input:focus {
+        border-color: #ff6b35;
+        box-shadow: 0 0 0 0.25rem rgba(255, 107, 53, 0.25);
+    }
+
+    .form-check-input:checked {
+        background-color: #ff6b35;
+        border-color: #ff6b35;
+    }
+</style>
+
+<form id="deleteAccountForm" action="{{ url_for('delete_account') }}" method="POST" style="display: none;"></form>
+<script>
+    function confirmDelete() {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this! Your account and all associated data will be permanently deleted.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteAccountForm').submit();
+            }
+        });
+    }
+</script>
+{% endblock %}

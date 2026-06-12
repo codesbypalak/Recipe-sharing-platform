@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }}'s Profile - NEPAL's Stories{% endblock %}
+
+{% block content %}
+<div class="container py-5 position-relative">
+    <!-- Back Button -->
+    <a href="{{ url_for('index') }}"
+        class="btn btn-light rounded-circle shadow-sm d-flex align-items-center justify-content-center position-absolute top-0 start-0 mt-5 ms-3"
+        style="width: 40px; height: 40px; border: 1px solid #eee; z-index: 1000; transition: all 0.3s ease;">
+        <i class="fas fa-arrow-left text-dark"></i>
+    </a>
+    <!-- Profile Header -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-md-3 text-center border-end">
+                    {% if user.profile_image %}
+                    <img src="{{ url_for('uploaded_file', filename=user.profile_image) }}"
+                        class="rounded-circle shadow-sm mb-3" alt="{{ user.username }}"
+                        style="width: 100px; height: 100px; object-fit: cover; border: 3px solid #fff;">
+                    {% else %}
+                    <div class="rounded-circle bg-primary-custom d-flex align-items-center justify-content-center mx-auto shadow-sm mb-3"
+                        style="width: 100px; height: 100px; background-color: #0066b2 !important; color: white; font-size: 50px; font-weight: bold; border: 3px solid #fff;">
+                        {{ user.username[0]|upper }}
+                    </div>
+                    {% endif %}
+
+                    <h4 class="mb-1 fw-bold">{{ user.username }}</h4>
+                    {% if user.first_name or user.last_name %}
+                    <p class="text-muted-custom small mb-2">{{ user.first_name }} {{ user.last_name }}</p>
+                    {% endif %}
+
+                    {% if user.bio %}
+                    <p class="text-muted small fst-italic mb-3">{{ user.bio }}</p>
+                    {% endif %}
+
+                    {% if session.user_id != user.id %}
+                    <div class="mt-2">
+                        <button id="followBtn" onclick="toggleFollow(event, {{ user.id }}, this)"
+                            class="btn btn-{{ 'outline-' if is_following else '' }}primary rounded-pill px-4 fw-bold shadow-sm btn-sm follow-btn-{{ user.id }}">
+                            {{ 'Following' if is_following else 'Follow Chef' }}
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-9">
+                    <div class="row text-center px-4">
+                        <div class="col-sm-3 col-6">
+                            <h3 class="fw-bold mb-0">{{ recipes|length }}</h3>
+                            <p class="text-muted small mb-0">Recipes</p>
+                        </div>
+                        <div class="col-sm-3 col-6">
+                            <h3 class="fw-bold mb-0">{{ "%.1f"|format(user_avg_score) }}</h3>
+                            <p class="text-muted small mb-0">Avg Rating</p>
+                        </div>
+                        <div class="col-sm-3 col-6 cursor-pointer" data-bs-toggle="modal"
+                            data-bs-target="#followersModal" style="cursor: pointer;">
+                            <h3 class="fw-bold mb-0" id="followerCount">{{ follower_count }}</h3>
+                            <p class="text-muted small mb-0">Followers</p>
+                        </div>
+                        <div class="col-sm-3 col-6 cursor-pointer" data-bs-toggle="modal"
+                            data-bs-target="#followingModal" style="cursor: pointer;">
+                            <h3 class="fw-bold mb-0" id="followingCount">{{ following_count }}</h3>
+                            <p class="text-muted small mb-0">Following</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Achievements / Badges ────────────────────────────────────────── -->
+    {% if user_badges %}
+    <div class="card border-0 shadow-sm mb-4" id="achievementsCard">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3 gap-2">
+                <span style="font-size:1.4rem;">🏅</span>
+                <h5 class="fw-bold mb-0">Achievements</h5>
+                <span class="badge rounded-pill ms-auto"
+                    style="background: linear-gradient(135deg,#667eea,#764ba2); font-size:.75rem; padding:.35em .75em;">
+                    {{ user_badges|length }} Earned
+                </span>
+            </div>
+
+            <div class="d-flex flex-wrap gap-3" id="badgesContainer">
+                {% for badge in user_badges %}
+                <div class="badge-pill-wrap" style="animation-delay: {{ loop.index0 * 0.08 }}s" data-bs-toggle="tooltip"
+                    data-bs-placement="top" title="{{ badge.description }}">
+                    <div class="badge-pill d-flex align-items-center gap-2 px-3 py-2 rounded-pill"
+                        style="background: {{ badge.gradient }}; color:#fff; box-shadow: 0 4px 15px {{ badge.color }}55; cursor:default; user-select:none; transition: transform .2s, box-shadow .2s;">
+                        <span style="font-size:1.1rem; line-height:1;">{{ badge.emoji }}</span>
+                        <span class="fw-semibold" style="font-size:.85rem; letter-spacing:.03em;">{{ badge.name
+                            }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* Badge entrance animation */
+        .badge-pill-wrap {
+            opacity: 0;
+            transform: translateY(12px);
+            animation: badgeFadeUp 0.5s ease forwards;
+        }
+
+        @keyframes badgeFadeUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .badge-pill:hover {
+            transform: translateY(-3px) scale(1.04);
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25) !important;
+        }
+    </style>
+    {% else %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4 text-center">
+            <div class="text-muted mb-2">
+                <i class="fas fa-medal fa-2x opacity-25"></i>
+            </div>
+            <h6 class="fw-bold text-muted mb-1">No Achievements Yet</h6>
+            <p class="text-muted small mb-0">Upload recipes and earn ratings to unlock badges!</p>
+        </div>
+    </div>
+    {% endif %}
+    <!-- ────────────────────────────────────────────────────────────────── -->
+
+    <!-- User's Recipes -->
+    <div class="my-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">My Recipes</h2>
+            <span class="badge bg-primary rounded-pill">{{ recipes|length }}</span>
+        </div>
+
+        {% if recipes %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for recipe in recipes %}
+            <div class="col">
+                <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="text-decoration-none">
+                    <div class="recipe-card h-100">
+                        <div class="recipe-image-wrapper">
+                            {% if recipe.image_url %}
+                            <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                                alt="{{ recipe.title }}">
+                            {% else %}
+                            <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/400/400.jpg"
+                                alt="{{ recipe.title }}">
+                            {% endif %}
+
+                            <div class="recipe-overlay">
+                                <h5>{{ recipe.title }}</h5>
+                            </div>
+                        </div>
+
+                        <div class="recipe-meta">
+                            <div class="left-meta">
+                                <div class="recipe-author">
+                                    <span class="author-initial">{{ user.username[0]|upper }}</span>
+                                    <span>{{ user.username }}</span>
+                                </div>
+                            </div>
+                            <div class="right-meta">
+                                {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+                                <div class="recipe-rating-stars">
+                                    {% set rating = recipe.avg_rating|default(0) %}
+                                    {% for i in range(1, 6) %}
+                                    {% if rating >= i %}
+                                    <i class="fas fa-star"></i>
+                                    {% elif rating >= i - 0.5 %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 bg-white rounded shadow-sm">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No recipes yet</h4>
+            <p class="text-muted">Start sharing your delicious recipes!</p>
+            {% if session.user_id and session.username == user.username %}
+            <a href="{{ url_for('create_recipe') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>Create Your First Recipe
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+
+    {% if session.user_id and session.username == user.username %}
+    <!-- Rated Recipes -->
+    <div class="my-5 pt-4 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">Rated Recipes</h2>
+            <span class="badge bg-warning text-dark rounded-pill">{{ rated_recipes|length }}</span>
+        </div>
+
+        {% if rated_recipes %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for recipe in rated_recipes %}
+            <div class="col">
+                <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="text-decoration-none">
+                    <div class="recipe-card h-100">
+                        <div class="recipe-image-wrapper">
+                            {% if recipe.image_url %}
+                            <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                                alt="{{ recipe.title }}">
+                            {% else %}
+                            <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/400/400.jpg"
+                                alt="{{ recipe.title }}">
+                            {% endif %}
+
+                            <div class="recipe-overlay">
+                                <h5>{{ recipe.title }}</h5>
+                            </div>
+                        </div>
+
+                        <div class="recipe-meta">
+                            <div class="left-meta">
+                                <div class="recipe-author">
+                                    <span class="author-initial bg-secondary"
+                                        style="background-color: #6c757d !important;">{{ (recipe.author_name or
+                                        "U")[0]|upper }}</span>
+                                    <span>{{ recipe.author_name or "Unknown Chef" }}</span>
+                                </div>
+                                <div class="mt-1 d-flex align-items-center gap-2">
+                                    <div class="text-warning small">
+                                        {% for i in range(1, 6) %}
+                                        {% if i <= recipe.user_given_rating %} <i class="fas fa-star"></i>
+                                            {% else %}
+                                            <i class="far fa-star"></i>
+                                            {% endif %}
+                                            {% endfor %}
+                                    </div>
+                                </div>
+                                {% if recipe.user_review %}
+                                <small class="text-muted d-block text-truncate" style="max-width: 151px;">"{{
+                                    recipe.user_review }}"</small>
+                                {% endif %}
+                            </div>
+                            <div class="right-meta">
+                                {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+                                <div class="recipe-rating-stars">
+                                    {% set rating = recipe.avg_rating|default(0) %}
+                                    {% for i in range(1, 6) %}
+                                    {% if rating >= i %}
+                                    <i class="fas fa-star"></i>
+                                    {% elif rating >= i - 0.5 %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 bg-white rounded shadow-sm">
+            <i class="fas fa-star-half-alt fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No ratings yet</h4>
+            <p class="text-muted">Explore and rate recipes to see them here!</p>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                Explore Recipes
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    <!-- Favorite Recipes -->
+    <div class="my-5 pt-4 border-top">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title mb-0">My Favorites</h2>
+            <span class="badge bg-danger rounded-pill">{{ favorite_recipes|length }}</span>
+        </div>
+
+        {% if favorite_recipes %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+            {% for recipe in favorite_recipes %}
+            <div class="col">
+                <a href="{{ url_for('view_recipe', recipe_id=recipe.id) }}" class="text-decoration-none">
+                    <div class="recipe-card h-100">
+                        <div class="recipe-image-wrapper">
+                            {% if recipe.image_url %}
+                            <img src="{{ url_for('uploaded_file', filename=recipe.image_url) }}"
+                                alt="{{ recipe.title }}">
+                            {% else %}
+                            <img src="https://picsum.photos/seed/recipe{{ recipe.id }}/400/400.jpg"
+                                alt="{{ recipe.title }}">
+                            {% endif %}
+
+                            <div class="recipe-overlay">
+                                <h5>{{ recipe.title }}</h5>
+                            </div>
+                        </div>
+
+                        <div class="recipe-meta">
+                            <div class="left-meta">
+                                <div class="recipe-author">
+                                    <span class="author-initial bg-secondary"
+                                        style="background-color: #6c757d !important;">{{ (recipe.author_name or
+                                        "U")[0]|upper }}</span>
+                                    <span>{{ recipe.author_name or "Unknown Chef" }}</span>
+                                </div>
+
+                            </div>
+                            <div class="right-meta">
+                                <div class="recipe-favorite active">
+                                    <i class="fas fa-heart text-danger"></i>
+                                </div>
+                                <a href="{{ url_for('view_recipe', recipe_id=recipe.id, print='true') }}"
+                                    class="recipe-print" target="_blank" title="Print Recipe"
+                                    onclick="event.stopPropagation();">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                {% if recipe.avg_rating and recipe.avg_rating > 0 %}
+                                <div class="recipe-rating-stars">
+                                    {% set rating = recipe.avg_rating|default(0) %}
+                                    {% for i in range(1, 6) %}
+                                    {% if rating >= i %}
+                                    <i class="fas fa-star"></i>
+                                    {% elif rating >= i - 0.5 %}
+                                    <i class="fas fa-star-half-alt"></i>
+                                    {% else %}
+                                    <i class="far fa-star"></i>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-5 bg-white rounded shadow-sm">
+            <i class="fas fa-heart-broken fa-3x text-muted mb-3"></i>
+            <h4 class="text-muted">No favorite recipes yet</h4>
+            <p class="text-muted">Save recipes to your favorites to find them easily here!</p>
+            <a href="{{ url_for('index') }}" class="btn btn-outline-danger">
+                Browse Recipes
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<!-- Followers Modal -->
+<div class="modal fade" id="followersModal" tabindex="-1" aria-labelledby="followersModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="followersModalLabel">Followers</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush">
+                    {% if followers %}
+                    {% for follower in followers %}
+                    <a href="{{ url_for('profile', username=follower.username) }}"
+                        class="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            {% if follower.profile_image %}
+                            <img src="{{ url_for('uploaded_file', filename=follower.profile_image) }}"
+                                class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-primary-custom d-flex align-items-center justify-content-center me-3"
+                                style="width: 40px; height: 40px; background-color: #0066b2 !important; color: white; font-weight: bold;">
+                                {{ follower.username[0]|upper }}
+                            </div>
+                            {% endif %}
+                            <span class="fw-semibold">{{ follower.username }}</span>
+                        </div>
+                        {% if session.user_id and session.user_id == user.id %}
+                        <div class="d-flex gap-2">
+                            <button onclick="removeFollower(event, {{ follower.id }}, this)"
+                                class="btn btn-sm btn-outline-danger rounded-pill px-3 fw-bold">
+                                Remove
+                            </button>
+                        </div>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <div class="py-5 text-center text-muted">
+                        <i class="fas fa-users fa-2x mb-2 opacity-50"></i>
+                        <p class="mb-0">No followers yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Following Modal -->
+<div class="modal fade" id="followingModal" tabindex="-1" aria-labelledby="followingModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="followingModalLabel">Following</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <div class="list-group list-group-flush">
+                    {% if following_list %}
+                    {% for followed in following_list %}
+                    <a href="{{ url_for('profile', username=followed.username) }}"
+                        class="list-group-item list-group-item-action border-0 px-4 py-3 d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            {% if followed.profile_image %}
+                            <img src="{{ url_for('uploaded_file', filename=followed.profile_image) }}"
+                                class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                            {% else %}
+                            <div class="rounded-circle bg-primary-custom d-flex align-items-center justify-content-center me-3"
+                                style="width: 40px; height: 40px; background-color: #0066b2 !important; color: white; font-weight: bold;">
+                                {{ followed.username[0]|upper }}
+                            </div>
+                            {% endif %}
+                            <span class="fw-semibold">{{ followed.username }}</span>
+                        </div>
+                        {% if session.user_id != followed.id %}
+                        <button onclick="toggleFollow(event, {{ followed.id }}, this)"
+                            class="btn btn-sm rounded-pill px-3 fw-bold follow-btn-{{ followed.id }} {{ 'btn-outline-primary' if followed.is_followed_by_current else 'btn-primary' }}">
+                            {{ 'Following' if followed.is_followed_by_current else 'Follow' }}
+                        </button>
+                        {% endif %}
+                    </a>
+                    {% endfor %}
+                    {% else %}
+                    <div class="py-5 text-center text-muted">
+                        <i class="fas fa-user-plus fa-2x mb-2 opacity-50"></i>
+                        <p class="mb-0">Not following anyone yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Activate Bootstrap tooltips for badge pills
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipEls = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipEls.forEach(function (el) { new bootstrap.Tooltip(el); });
+    });
+    function toggleFollow(event, userId, btnElement) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        fetch(`/profile/toggle-follow/${userId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "{{ url_for('login') }}";
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                if (data.success) {
+                    // Update all buttons for this user on the page
+                    const buttons = document.querySelectorAll(`.follow-btn-${userId}`);
+                    const followerText = document.getElementById('followerCount');
+                    const followingText = document.getElementById('followingCount');
+
+                    // Safely define variables using strings to prevent JS auto-formatters from breaking Jinja syntax
+                    const currentProfId = "{{ user.id }}";
+                    const currentSessionId = "{{ session.user_id if session.user_id else 'null' }}";
+
+                    const isProfileOwner = currentProfId == String(userId);
+                    const isOwnProfile = currentSessionId == currentProfId;
+
+                    buttons.forEach(btn => {
+                        const isMainBtn = btn.id === 'followBtn';
+                        if (data.following) {
+                            btn.classList.remove('btn-primary');
+                            btn.classList.add('btn-outline-primary');
+                            btn.innerText = isMainBtn ? 'Following' : 'Following';
+                        } else {
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-primary');
+                            btn.innerText = isMainBtn ? 'Follow Chef' : 'Follow';
+                        }
+                    });
+
+                    // Update count if we are on the profile of the person being followed/unfollowed
+                    if (followerText && isProfileOwner) {
+                        let count = parseInt(followerText.innerText);
+                        followerText.innerText = data.following ? count + 1 : count - 1;
+                    }
+
+                    // Update following count if we are viewing our own profile
+                    if (followingText && isOwnProfile) {
+                        let count = parseInt(followingText.innerText);
+                        followingText.innerText = data.following ? count + 1 : count - 1;
+                    }
+
+                    // Hide the user from the following modal if they are unfollowed
+                    if (!data.following && btnElement && isOwnProfile) {
+                        const inFollowingModal = btnElement.closest('#followingModal');
+                        if (inFollowingModal) {
+                            const listItem = btnElement.closest('.list-group-item');
+                            if (listItem) {
+                                listItem.style.display = 'none';
+                            }
+                        }
+                    }
+
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else if (data.error) {
+                    Swal.fire({
+                        title: 'Oops!',
+                        text: data.error,
+                        icon: 'error',
+                        timer: 3000,
+                        showConfirmButton: true
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error toggling follow:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            });
+    }
+
+    function removeFollower(event, followerId, btnElement) {
+        if (event) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+
+        if (!confirm("Are you sure you want to remove this follower? They won't be notified.")) return;
+
+        fetch(`/profile/remove-follower/${followerId}`, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = "{{ url_for('login') }}";
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (!data) return;
+
+                if (data.success) {
+                    // Remove from list visually
+                    const listItem = btnElement.closest('.list-group-item');
+                    if (listItem) {
+                        listItem.remove();
+                    }
+
+                    // Decrease follower count
+                    const followerText = document.getElementById('followerCount');
+                    if (followerText) {
+                        let count = parseInt(followerText.innerText);
+                        followerText.innerText = Math.max(0, count - 1);
+                    }
+
+                    Swal.fire({
+                        title: 'Removed',
+                        text: data.message,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false,
+                        toast: true,
+                        position: 'top-end'
+                    });
+                } else if (data.error) {
+                    Swal.fire('Oops!', data.error, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error removing follower:', error);
+                Swal.fire('Error!', 'An error occurred. Please try again.', 'error');
+            });
+    }
+
+    function deleteRecipe(recipeId, recipeTitle) {
+        if (confirm('Are you sure you want to delete "' + recipeTitle + '"? This action cannot be undone.')) {
+            fetch('/recipe/' + recipeId + '/delete', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        window.location.href = '/';
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
+                });
+        }
+    }
+</script>
+{% endblock %}
